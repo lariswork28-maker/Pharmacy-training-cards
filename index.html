@@ -40,8 +40,8 @@
 
         .container {
             width: 100%;
-            max-width: 800px;
-            background: rgba(255, 255, 255, 0.9);
+            max-width: 850px;
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
             padding: 30px;
             border-radius: var(--border-radius);
@@ -102,7 +102,7 @@
 
         textarea {
             resize: vertical;
-            height: 70px;
+            height: 65px;
         }
 
         .checkbox-group {
@@ -169,14 +169,14 @@
         /* Flashcard Preview Style */
         #flashcard-preview {
             width: 100%;
-            max-width: 800px;
+            max-width: 850px;
             background: #FFFFFF;
-            border-radius: var(--border-radius);
+            border-radius: 24px;
             box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-            padding: 25px;
+            padding: 30px;
             position: relative;
             display: none;
-            border: 3px dashed var(--primary);
+            border: 3px solid #FFE3E8;
             margin-top: 20px;
         }
 
@@ -184,8 +184,8 @@
             display: flex;
             flex-direction: column;
             gap: 4px;
-            margin-bottom: 15px;
-            padding-right: 90px; /* Space for image */
+            margin-bottom: 20px;
+            padding-right: 95px; /* Space for floating image */
         }
 
         .system-tag {
@@ -194,7 +194,7 @@
             color: var(--primary);
             font-size: 0.75rem;
             font-weight: 700;
-            padding: 3px 10px;
+            padding: 4px 12px;
             border-radius: 20px;
             width: fit-content;
             text-transform: uppercase;
@@ -202,7 +202,7 @@
         }
 
         .trade-name {
-            font-size: 1.5rem;
+            font-size: 1.6rem;
             font-weight: 700;
             color: var(--text-main);
         }
@@ -215,11 +215,11 @@
 
         .med-image-container {
             position: absolute;
-            top: 25px;
-            right: 25px;
-            width: 75px;
-            height: 75px;
-            border-radius: 10px;
+            top: 30px;
+            right: 30px;
+            width: 80px;
+            height: 80px;
+            border-radius: 16px;
             overflow: hidden;
             border: 2px solid #EDF2F7;
             background: #F7FAFC;
@@ -237,14 +237,14 @@
         .card-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 12px;
+            gap: 14px;
             margin-bottom: 15px;
         }
 
         .card-section {
             background: #F8FAFC;
-            padding: 10px 12px;
-            border-radius: 8px;
+            padding: 12px 16px;
+            border-radius: 16px;
             border-left: 4px solid var(--secondary);
         }
 
@@ -257,7 +257,7 @@
             font-size: 0.75rem;
             text-transform: uppercase;
             color: var(--text-muted);
-            margin-bottom: 3px;
+            margin-bottom: 4px;
             letter-spacing: 0.5px;
         }
 
@@ -270,13 +270,13 @@
         .safety-badges {
             display: flex;
             gap: 10px;
-            margin-top: 10px;
+            margin-top: 15px;
             flex-wrap: wrap;
         }
 
         .badge {
-            padding: 4px 10px;
-            border-radius: 6px;
+            padding: 6px 12px;
+            border-radius: 12px;
             font-size: 0.75rem;
             font-weight: 600;
         }
@@ -296,8 +296,8 @@
             font-size: 0.8rem;
             background: #EBF8FF;
             border-left: 4px solid #3182CE;
-            padding: 10px 15px;
-            border-radius: 0 8px 8px 0;
+            padding: 12px 18px;
+            border-radius: 0 12px 12px 0;
             color: #2B6CB0;
         }
     </style>
@@ -305,11 +305,10 @@
 <body>
 
     <div class="container">
-        <h1>💊 Rx Flashcard Studio</h1>
+        <h1>Rx Flashcard Studio</h1>
         <p class="subtitle">Organize your pharmacy training flashcards by body system and download them instantly.</p>
 
         <form id="cardForm" class="form-grid">
-            <!-- System Selector Added at the Top -->
             <div class="form-group full-width">
                 <label>Medical System Category</label>
                 <select id="medSystem" required>
@@ -343,8 +342,18 @@
             </div>
 
             <div class="form-group">
+                <label>Available Dosages / Strengths</label>
+                <input type="text" id="availableDosage" placeholder="e.g., 500mg, 850mg, 1000mg tablets">
+            </div>
+
+            <div class="form-group">
                 <label>Medicine Photo</label>
                 <input type="file" id="medPhoto" accept="image/*">
+            </div>
+
+            <div class="form-group">
+                <label>Price</label>
+                <input type="text" id="price" placeholder="e.g., $15.00 / Local currency">
             </div>
 
             <div class="form-group">
@@ -358,13 +367,23 @@
             </div>
 
             <div class="form-group">
-                <label>Contraindications</label>
-                <textarea id="contraindications" placeholder="e.g., Severe renal impairment, metabolic acidosis"></textarea>
+                <label>Doses & Regimen</label>
+                <textarea id="doses" placeholder="e.g., 500mg twice daily with meals"></textarea>
             </div>
 
             <div class="form-group">
-                <label>Doses & Regimen</label>
-                <textarea id="doses" placeholder="e.g., 500mg twice daily with meals"></textarea>
+                <label>Common Side Effects</label>
+                <textarea id="commonSideEffects" placeholder="e.g., Nausea, diarrhea, abdominal discomfort"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Side Effects (Rare / Serious)</label>
+                <textarea id="sideEffects" placeholder="e.g., Lactic acidosis, vitamin B12 deficiency"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Contraindications</label>
+                <textarea id="contraindications" placeholder="e.g., Severe renal impairment, metabolic acidosis"></textarea>
             </div>
 
             <div class="form-group full-width">
@@ -377,8 +396,8 @@
             </div>
 
             <div class="btn-container">
-                <button type="button" class="btn-generate" onclick="generateCard()">✨ Generate Flashcard</button>
-                <button type="button" class="btn-download" id="downloadBtn" onclick="downloadCard()">📥 Download as Image</button>
+                <button type="button" class="btn-generate" onclick="generateCard()">Generate Flashcard</button>
+                <button type="button" class="btn-download" id="downloadBtn" onclick="downloadCard()">Download as Image</button>
             </div>
         </form>
     </div>
@@ -405,12 +424,28 @@
                 <p id="previewMoa">-</p>
             </div>
             <div class="card-section">
+                <h4>Available Strengths</h4>
+                <p id="previewAvailableDose">-</p>
+            </div>
+            <div class="card-section">
+                <h4>Dosing Regimen</h4>
+                <p id="previewDose">-</p>
+            </div>
+            <div class="card-section">
+                <h4>Common Side Effects</h4>
+                <p id="previewCommonSE">-</p>
+            </div>
+            <div class="card-section">
+                <h4>Side Effects</h4>
+                <p id="previewSE">-</p>
+            </div>
+            <div class="card-section">
                 <h4>Contraindications</h4>
                 <p id="previewContra">-</p>
             </div>
             <div class="card-section">
-                <h4>Dosing</h4>
-                <p id="previewDose">-</p>
+                <h4>Price</h4>
+                <p id="previewPrice">-</p>
             </div>
             <div class="card-section full">
                 <h4>Alternative Brands</h4>
@@ -424,7 +459,7 @@
     </div>
 
     <div class="container training-tip" style="margin-top: 20px;">
-        💡 <strong>Training Tip:</strong> Grouping your downloaded cards into computer folders by system (e.g., a "GIT" folder and a "Respiratory" folder) will make pre-exam reviews or clinical rounds lookups much faster!
+        <strong>Training Tip:</strong> Grouping your downloaded cards into computer folders by system (e.g., a GIT folder and a Respiratory folder) will make pre-exam reviews or clinical rounds lookups much faster.
     </div>
 
     <script>
@@ -446,8 +481,12 @@
             const trade = document.getElementById('tradeName').value || "Trade Name";
             const active = document.getElementById('activeIngredient').value || "Active Ingredient";
             const alt = document.getElementById('alternative').value || "None";
+            const availableDose = document.getElementById('availableDosage').value || "Not specified";
+            const price = document.getElementById('price').value || "Not specified";
             const indication = document.getElementById('indication').value || "Not specified";
             const moa = document.getElementById('moa').value || "Not specified";
+            const commonSE = document.getElementById('commonSideEffects').value || "None noted";
+            const se = document.getElementById('sideEffects').value || "None noted";
             const contra = document.getElementById('contraindications').value || "None noted";
             const doses = document.getElementById('doses').value || "Standard dosing";
 
@@ -459,8 +498,12 @@
             document.getElementById('previewTrade').innerText = trade;
             document.getElementById('previewActive').innerText = active;
             document.getElementById('previewAlt').innerText = alt;
+            document.getElementById('previewAvailableDose').innerText = availableDose;
+            document.getElementById('previewPrice').innerText = price;
             document.getElementById('previewIndication').innerText = indication;
             document.getElementById('previewMoa').innerText = moa;
+            document.getElementById('previewCommonSE').innerText = commonSE;
+            document.getElementById('previewSE').innerText = se;
             document.getElementById('previewContra').innerText = contra;
             document.getElementById('previewDose').innerText = doses;
 
