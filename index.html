@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rx Flashcard Creator</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- html2canvas for downloading the card -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --primary: #FF6B8B;
+            --secondary: #FF8E53;
+            --accent: #4E65FF;
+            --bg-color: #FFF0F3;
+            --card-bg: #FFFFFF;
+            --text-main: #2D3748;
+            --text-muted: #718096;
+            --safe-green: #48BB78;
+            --border-radius: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #FFF0F3 0%, #E2E8F0 100%);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            margin-bottom: 8px;
+            font-size: 1.8rem;
+        }
+
+        p.subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            margin-bottom: 25px;
+            font-size: 0.9rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+
+        label {
+            font-weight: 500;
+            font-size: 0.85rem;
+            margin-bottom: 5px;
+            color: var(--text-main);
+        }
+
+        input, select, textarea {
+            padding: 10px 14px;
+            border: 2px solid #EDF2F7;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            outline: none;
+            background: #FAFCFF;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--primary);
+            background: #FFF;
+        }
+
+        textarea {
+            resize: vertical;
+            height: 70px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            background: #F7FAFC;
+            padding: 12px 15px;
+            border-radius: 10px;
+            border: 2px solid #EDF2F7;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 500;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        .checkbox-label input {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--safe-green);
+            cursor: pointer;
+        }
+
+        .btn-container {
+            grid-column: span 2;
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s ease, opacity 0.2s;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .btn-generate {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 107, 139, 0.3);
+        }
+
+        .btn-download {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 4px 15px rgba(78, 101, 255, 0.3);
+            display: none;
+        }
+
+        /* Flashcard Preview Style */
+        #flashcard-preview {
+            width: 100%;
+            max-width: 800px;
+            background: #FFFFFF;
+            border-radius: var(--border-radius);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            padding: 25px;
+            position: relative;
+            display: none;
+            border: 3px dashed var(--primary);
+            margin-top: 20px;
+        }
+
+        .card-header {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-bottom: 15px;
+            padding-right: 90px; /* Space for image */
+        }
+
+        .system-tag {
+            display: inline-block;
+            background: #FFF0F3;
+            color: var(--primary);
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 20px;
+            width: fit-content;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .trade-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .active-ingredient {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .med-image-container {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            width: 75px;
+            height: 75px;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 2px solid #EDF2F7;
+            background: #F7FAFC;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .med-image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .card-section {
+            background: #F8FAFC;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border-left: 4px solid var(--secondary);
+        }
+
+        .card-section.full {
+            grid-column: span 2;
+            border-left-color: var(--accent);
+        }
+
+        .card-section h4 {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 3px;
+            letter-spacing: 0.5px;
+        }
+
+        .card-section p {
+            font-size: 0.88rem;
+            color: var(--text-main);
+            word-break: break-word;
+        }
+
+        .safety-badges {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge.safe {
+            background: #C6F6D5;
+            color: #22543D;
+        }
+
+        .badge.unsafe {
+            background: #FED7D7;
+            color: #742A2A;
+        }
+
+        .training-tip {
+            margin-top: 25px;
+            font-size: 0.8rem;
+            background: #EBF8FF;
+            border-left: 4px solid #3182CE;
+            padding: 10px 15px;
+            border-radius: 0 8px 8px 0;
+            color: #2B6CB0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>💊 Rx Flashcard Studio</h1>
+        <p class="subtitle">Organize your pharmacy training flashcards by body system and download them instantly.</p>
+
+        <form id="cardForm" class="form-grid">
+            <!-- System Selector Added at the Top -->
+            <div class="form-group full-width">
+                <label>Medical System Category</label>
+                <select id="medSystem" required>
+                    <option value="" disabled selected>-- Choose Medical System --</option>
+                    <option value="Gastrointestinal (GIT)">Gastrointestinal (GIT)</option>
+                    <option value="Respiratory">Respiratory System</option>
+                    <option value="Cardiovascular">Cardiovascular System</option>
+                    <option value="Endocrine & Metabolic">Endocrine & Metabolic</option>
+                    <option value="Central Nervous System (CNS)">Central Nervous System (CNS)</option>
+                    <option value="Infectious Diseases / Antimicrobials">Infectious Diseases / Antimicrobials</option>
+                    <option value="Musculoskeletal & Pain">Musculoskeletal & Pain</option>
+                    <option value="Dermatology">Dermatology</option>
+                    <option value="Renal & Urology">Renal & Urology</option>
+                    <option value="Other System">Other System</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Trade Name</label>
+                <input type="text" id="tradeName" placeholder="e.g., Glucophage" required>
+            </div>
+
+            <div class="form-group">
+                <label>Active Ingredient</label>
+                <input type="text" id="activeIngredient" placeholder="e.g., Metformin HCl" required>
+            </div>
+
+            <div class="form-group">
+                <label>Alternative / Brand</label>
+                <input type="text" id="alternative" placeholder="e.g., Cidophage">
+            </div>
+
+            <div class="form-group">
+                <label>Medicine Photo</label>
+                <input type="file" id="medPhoto" accept="image/*">
+            </div>
+
+            <div class="form-group">
+                <label>Indication (Why we use it)</label>
+                <textarea id="indication" placeholder="e.g., Type 2 Diabetes Mellitus management"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Mechanism of Action (MOA)</label>
+                <textarea id="moa" placeholder="e.g., Decreases hepatic glucose production..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Contraindications</label>
+                <textarea id="contraindications" placeholder="e.g., Severe renal impairment, metabolic acidosis"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Doses & Regimen</label>
+                <textarea id="doses" placeholder="e.g., 500mg twice daily with meals"></textarea>
+            </div>
+
+            <div class="form-group full-width">
+                <label>Safety Profile Checklists</label>
+                <div class="checkbox-group">
+                    <label class="checkbox-label"><input type="checkbox" id="safePregnancy"> Safe in Pregnancy</label>
+                    <label class="checkbox-label"><input type="checkbox" id="safeBreastfeeding"> Safe in Breastfeeding</label>
+                    <label class="checkbox-label"><input type="checkbox" id="safeChildren"> Safe in Children</label>
+                </div>
+            </div>
+
+            <div class="btn-container">
+                <button type="button" class="btn-generate" onclick="generateCard()">✨ Generate Flashcard</button>
+                <button type="button" class="btn-download" id="downloadBtn" onclick="downloadCard()">📥 Download as Image</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- The Rendered Card Preview -->
+    <div id="flashcard-preview">
+        <div class="med-image-container" id="imagePreviewBox">
+            <span style="font-size: 10px; color: #A0AEC0;">No Image</span>
+        </div>
+
+        <div class="card-header">
+            <span class="system-tag" id="previewSystem">System Name</span>
+            <div class="trade-name" id="previewTrade">Trade Name</div>
+            <div class="active-ingredient" id="previewActive">Active Ingredient</div>
+        </div>
+
+        <div class="card-grid">
+            <div class="card-section">
+                <h4>Indication</h4>
+                <p id="previewIndication">-</p>
+            </div>
+            <div class="card-section">
+                <h4>Mechanism of Action</h4>
+                <p id="previewMoa">-</p>
+            </div>
+            <div class="card-section">
+                <h4>Contraindications</h4>
+                <p id="previewContra">-</p>
+            </div>
+            <div class="card-section">
+                <h4>Dosing</h4>
+                <p id="previewDose">-</p>
+            </div>
+            <div class="card-section full">
+                <h4>Alternative Brands</h4>
+                <p id="previewAlt">-</p>
+            </div>
+        </div>
+
+        <div class="safety-badges" id="previewBadges">
+            <!-- Badges populated by JS -->
+        </div>
+    </div>
+
+    <div class="container training-tip" style="margin-top: 20px;">
+        💡 <strong>Training Tip:</strong> Grouping your downloaded cards into computer folders by system (e.g., a "GIT" folder and a "Respiratory" folder) will make pre-exam reviews or clinical rounds lookups much faster!
+    </div>
+
+    <script>
+        let uploadedImageSrc = "";
+
+        document.getElementById('medPhoto').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    uploadedImageSrc = e.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function generateCard() {
+            const system = document.getElementById('medSystem').value || "General";
+            const trade = document.getElementById('tradeName').value || "Trade Name";
+            const active = document.getElementById('activeIngredient').value || "Active Ingredient";
+            const alt = document.getElementById('alternative').value || "None";
+            const indication = document.getElementById('indication').value || "Not specified";
+            const moa = document.getElementById('moa').value || "Not specified";
+            const contra = document.getElementById('contraindications').value || "None noted";
+            const doses = document.getElementById('doses').value || "Standard dosing";
+
+            const safeP = document.getElementById('safePregnancy').checked;
+            const safeB = document.getElementById('safeBreastfeeding').checked;
+            const safeC = document.getElementById('safeChildren').checked;
+
+            document.getElementById('previewSystem').innerText = system;
+            document.getElementById('previewTrade').innerText = trade;
+            document.getElementById('previewActive').innerText = active;
+            document.getElementById('previewAlt').innerText = alt;
+            document.getElementById('previewIndication').innerText = indication;
+            document.getElementById('previewMoa').innerText = moa;
+            document.getElementById('previewContra').innerText = contra;
+            document.getElementById('previewDose').innerText = doses;
+
+            const imgBox = document.getElementById('imagePreviewBox');
+            if (uploadedImageSrc) {
+                imgBox.innerHTML = `<img src="${uploadedImageSrc}" alt="Medication Photo">`;
+            } else {
+                imgBox.innerHTML = `<span style="font-size: 10px; color: #A0AEC0;">No Image</span>`;
+            }
+
+            const badgesContainer = document.getElementById('previewBadges');
+            badgesContainer.innerHTML = `
+                <span class="badge ${safeP ? 'safe' : 'unsafe'}">Pregnancy: ${safeP ? 'Safe' : 'Caution'}</span>
+                <span class="badge ${safeB ? 'safe' : 'unsafe'}">Breastfeeding: ${safeB ? 'Safe' : 'Caution'}</span>
+                <span class="badge ${safeC ? 'safe' : 'unsafe'}">Children: ${safeC ? 'Safe' : 'Caution'}</span>
+            `;
+
+            document.getElementById('flashcard-preview').style.display = 'block';
+            document.getElementById('downloadBtn').style.display = 'block';
+            document.getElementById('flashcard-preview').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function downloadCard() {
+            const cardElement = document.getElementById('flashcard-preview');
+            html2canvas(cardElement, { scale: 2 }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `${document.getElementById('tradeName').value || 'medication'}-flashcard.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
+        }
+    </script>
+</body>
+</html>
